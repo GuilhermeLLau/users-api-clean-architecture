@@ -1,5 +1,6 @@
 import { User, UserRole } from "../../domain/user/entity/user";
 import { UserGateway } from "../../domain/user/gateway/user.gateway";
+import { PasswordHasher } from "../security/password-hasher";
 import { Usecase } from "../usecase";
 
 export type CreateUserInputDTO = {
@@ -18,21 +19,23 @@ export class CreateUserUsecase implements Usecase<
   CreateUserInputDTO,
   CreateUserOutputDTO
 > {
-  private constructor(private readonly userGateway: UserGateway) {}
+  private constructor(
+    private readonly userGateway: UserGateway,
+    private readonly passwordHasher: PasswordHasher,
+  ) {}
 
-  public static build(userGateway: UserGateway) {
-    return new CreateUserUsecase(userGateway);
+  public static build(
+    userGateway: UserGateway,
+    passwordHasher: PasswordHasher,
+  ) {
+    return new CreateUserUsecase(userGateway, passwordHasher);
   }
 
   public async execute(
     input: CreateUserInputDTO,
   ): Promise<CreateUserOutputDTO> {
-    const user = User.build(
-      input.name,
-      input.email,
-      input.password,
-      input.role,
-    );
+    const hashPassword = await this.passwordHasher.hash(input.password);
+    const user = User.build(input.name, input.email, hashPassword, input.role);
 
     await this.userGateway.create(user);
 

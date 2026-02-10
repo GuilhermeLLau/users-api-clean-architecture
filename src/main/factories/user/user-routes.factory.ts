@@ -3,6 +3,7 @@ import { CreateUserRoute } from "../../../infra/api/express/routes/user/create-u
 import { FindUserByEmailRoute } from "../../../infra/api/express/routes/user/find-user-by-email.route.express";
 import { FindUserByIdRoute } from "../../../infra/api/express/routes/user/find-user-by-id.route.express";
 import { ListUserRoute } from "../../../infra/api/express/routes/user/list-user.route.express";
+import { BcryptPasswordHasher } from "../../../infra/cryptography/bcrypt-password-hasher";
 import { UserRepositoryPrisma } from "../../../infra/repositories/user/prisma/user.repository.prisma";
 import { CreateUserUsecase } from "../../../usecases/user/create-user.usecase";
 import { FindUserByEmailUsecase } from "../../../usecases/user/find-user-by-email.usecase";
@@ -12,7 +13,9 @@ import { ListUserUseCase } from "../../../usecases/user/list-user.usecase";
 export function makeUserRoutes(deps: { prisma: any }): Route[] {
   const repository = UserRepositoryPrisma.build(deps.prisma);
 
-  const createUserUsecase = CreateUserUsecase.build(repository);
+  const passwordHasher = new BcryptPasswordHasher();
+
+  const createUserUsecase = CreateUserUsecase.build(repository, passwordHasher);
   const createRoute = CreateUserRoute.create(createUserUsecase);
 
   const listUserUsecase = ListUserUseCase.build(repository);
