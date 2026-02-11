@@ -11,6 +11,7 @@ export type UpdateUserInputDTO = {
 export type UpdateUserOutputDTO = {
   id: string;
   name: string;
+  updatedAt: Date;
 };
 
 export class UpdateUserUsecase implements Usecase<
@@ -26,7 +27,9 @@ export class UpdateUserUsecase implements Usecase<
   public async execute(
     input: UpdateUserInputDTO,
   ): Promise<UpdateUserOutputDTO> {
-    const data: UpdateUserDTO = { name: input.name };
+    const data: UpdateUserDTO = {
+      name: input.name,
+    };
 
     const user = await this.userGateway.update(input.id, data);
 
@@ -37,6 +40,7 @@ export class UpdateUserUsecase implements Usecase<
     return {
       id: user.id,
       name: user.name,
+      updatedAt: user.updatedAt,
     };
   }
 }

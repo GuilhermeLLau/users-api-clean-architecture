@@ -1,14 +1,18 @@
 import { Route } from "../../../infra/api/express/routes/routes";
 import { CreateUserRoute } from "../../../infra/api/express/routes/user/create-user.route.express";
+import { DeleteUserRoute } from "../../../infra/api/express/routes/user/delete-user.route.express";
 import { FindUserByEmailRoute } from "../../../infra/api/express/routes/user/find-user-by-email.route.express";
 import { FindUserByIdRoute } from "../../../infra/api/express/routes/user/find-user-by-id.route.express";
 import { ListUserRoute } from "../../../infra/api/express/routes/user/list-user.route.express";
+import { UpdateUserRoute } from "../../../infra/api/express/routes/user/update-user.route.express";
 import { BcryptPasswordHasher } from "../../../infra/cryptography/bcrypt-password-hasher";
 import { UserRepositoryPrisma } from "../../../infra/repositories/user/prisma/user.repository.prisma";
 import { CreateUserUsecase } from "../../../usecases/user/create-user.usecase";
+import { DeleteUserUsecase } from "../../../usecases/user/delete-user.usecase";
 import { FindUserByEmailUsecase } from "../../../usecases/user/find-user-by-email.usecase";
 import { FindUserByIdUsecase } from "../../../usecases/user/find-user-by-id.usecase";
 import { ListUserUseCase } from "../../../usecases/user/list-user.usecase";
+import { UpdateUserUsecase } from "../../../usecases/user/update-user.usecase";
 
 export function makeUserRoutes(deps: { prisma: any }): Route[] {
   const repository = UserRepositoryPrisma.build(deps.prisma);
@@ -29,5 +33,18 @@ export function makeUserRoutes(deps: { prisma: any }): Route[] {
     findUserByEmailUsecase,
   );
 
-  return [createRoute, listUserRoute, findUserByIdRoute, findUserByEmailRoute];
+  const updateUserUsecase = UpdateUserUsecase.build(repository);
+  const updateUserRoute = UpdateUserRoute.create(updateUserUsecase);
+
+  const deleteUserUsecase = DeleteUserUsecase.build(repository);
+  const deleteUserRoute = DeleteUserRoute.create(deleteUserUsecase);
+
+  return [
+    createRoute,
+    listUserRoute,
+    findUserByIdRoute,
+    findUserByEmailRoute,
+    deleteUserRoute,
+    updateUserRoute,
+  ];
 }

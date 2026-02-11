@@ -43,8 +43,11 @@ export class UserRepositoryPrisma implements UserGateway {
   }
 
   public async update(id: string, updateUserDTO: UpdateUserDTO): Promise<User> {
+    const now = new Date();
+
     const data = {
       name: updateUserDTO.name,
+      updatedAt: now,
     };
 
     const updated = await this.prisma.user.update({
