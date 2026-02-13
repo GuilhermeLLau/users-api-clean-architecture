@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, RequestHandler, Response } from "express";
 import { CreateUserUsecase } from "../../../../../usecases/user/create-user.usecase";
 import { HttpMethod, Route } from "../routes";
 import { DeleteUserUsecase } from "../../../../../usecases/user/delete-user.usecase";
@@ -11,21 +11,26 @@ export class DeleteUserRoute implements Route {
     private readonly path: string,
     private readonly method: HttpMethod,
     private readonly deleteUserUsecase: DeleteUserUsecase,
+    private readonly middlewares: RequestHandler[] = [],
   ) {}
 
-  public static create(deleteUserUsecase: DeleteUserUsecase) {
+  public static create(
+    deleteUserUsecase: DeleteUserUsecase,
+    middlewares: RequestHandler[],
+  ) {
     return new DeleteUserRoute(
       "/users/:id",
       HttpMethod.DELETE,
       deleteUserUsecase,
+      middlewares,
     );
   }
 
   public getHandler() {
-    return async (request: Request, response: Response) => {
+    return async (request: Request, response: Response, next: NextFunction) => {
       const { id } = request.params;
 
-      if (!id) throw new Error("Erro");
+      if (!id) throw new Error("Invalid id");
 
       const input: DeleteUserInputDTO = {
         id: id.toString(),
@@ -33,7 +38,7 @@ export class DeleteUserRoute implements Route {
 
       await this.deleteUserUsecase.execute(input);
 
-      response.status(201).json({ message: "Usuário deletado" });
+      response.status(201).json({ message: "User deleted" });
     };
   }
 
@@ -45,5 +50,9 @@ export class DeleteUserRoute implements Route {
 
   public getMethod(): HttpMethod {
     return this.method;
+  }
+
+  public getMiddlewares(): RequestHandler[] {
+    return this.middlewares;
   }
 }

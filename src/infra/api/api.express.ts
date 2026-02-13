@@ -1,6 +1,7 @@
 import { Api } from "./api";
 import express, { Express } from "express";
 import { Route } from "./express/routes/routes";
+import { errorMiddleware } from "./express/middlewares/error.middleware";
 
 export class ApiExpress implements Api {
   private app: Express;
@@ -9,6 +10,7 @@ export class ApiExpress implements Api {
     this.app = express();
     this.app.use(express.json());
     this.addRoutes(routes);
+    this.app.use(errorMiddleware);
   }
 
   public static create(routes: Route[]) {
@@ -20,8 +22,9 @@ export class ApiExpress implements Api {
       const path = route.getPath();
       const method = route.getMethod();
       const handler = route.getHandler();
+      const middlewares = route.getMiddlewares ? route.getMiddlewares() : [];
 
-      this.app[method](path, handler);
+      this.app[method](path, ...middlewares, handler);
     });
   }
 

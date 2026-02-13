@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import {
   ListUserOutputDTO,
   ListUserUseCase,
@@ -30,7 +30,7 @@ export class ListUserRoute implements Route {
   }
 
   public getHandler() {
-    return async (request: Request, response: Response) => {
+    return async (request: Request, response: Response, next: NextFunction) => {
       const output = await this.listUserUsecase.execute();
 
       const responseBody = this.present(output);

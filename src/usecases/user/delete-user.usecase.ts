@@ -25,7 +25,7 @@ export class DeleteUserUsecase implements Usecase<
     try {
       await this.userGateway.delete(input.id);
     } catch (err) {
-      throw new Error("Erro");
+      throw new Error("Invalid id");
     }
   }
 

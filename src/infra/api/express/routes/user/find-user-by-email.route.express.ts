@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, RequestHandler, Response } from "express";
 import { HttpMethod, Route } from "../routes";
 import { User } from "../../../../../domain/user/entity/user";
 import {
@@ -11,21 +11,26 @@ export class FindUserByEmailRoute implements Route {
     private readonly path: string,
     private readonly method: HttpMethod,
     private findUserByEmailUsecase: FindUserByEmailUsecase,
+    private readonly middlewares: RequestHandler[] = [],
   ) {}
 
-  public static create(findUserByEmailUsecase: FindUserByEmailUsecase) {
+  public static create(
+    findUserByEmailUsecase: FindUserByEmailUsecase,
+    middlewares: RequestHandler[],
+  ) {
     return new FindUserByEmailRoute(
       "/users/email/:email",
       HttpMethod.GET,
       findUserByEmailUsecase,
+      middlewares,
     );
   }
 
   public getHandler() {
-    return async (request: Request, response: Response) => {
+    return async (request: Request, response: Response, next: NextFunction) => {
       const { email } = request.params;
 
-      if (!email) throw new Error("erro");
+      if (!email) throw new Error("Internal server error");
 
       const input: FindUserByEmailInputDTO = {
         email: email.toString(),
@@ -46,5 +51,9 @@ export class FindUserByEmailRoute implements Route {
   }
   public getMethod(): HttpMethod {
     return this.method;
+  }
+
+  public getMiddlewares(): RequestHandler[] {
+    return this.middlewares;
   }
 }

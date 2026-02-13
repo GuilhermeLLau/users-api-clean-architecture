@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, RequestHandler, Response } from "express";
 import { HttpMethod, Route } from "../routes";
 import {
   UpdateUserInputDTO,
@@ -13,18 +13,27 @@ export class UpdateUserRoute implements Route {
     private readonly path: string,
     private readonly method: HttpMethod,
     private readonly updateUserUsecase: UpdateUserUsecase,
+    private readonly middlewares: RequestHandler[] = [],
   ) {}
 
-  public static create(updateUserUsecase: UpdateUserUsecase) {
-    return new UpdateUserRoute("/users/:id", HttpMethod.PUT, updateUserUsecase);
+  public static create(
+    updateUserUsecase: UpdateUserUsecase,
+    middlewares: RequestHandler[],
+  ) {
+    return new UpdateUserRoute(
+      "/users/:id",
+      HttpMethod.PUT,
+      updateUserUsecase,
+      middlewares,
+    );
   }
 
   public getHandler() {
-    return async (request: Request, response: Response) => {
+    return async (request: Request, response: Response, next: NextFunction) => {
       const { id } = request.params;
       const { name } = request.body;
 
-      if (!id) throw new Error("Erro");
+      if (!id) throw new Error("Invalid id");
 
       const input: UpdateUserInputDTO = {
         id: id.toString(),
@@ -51,5 +60,8 @@ export class UpdateUserRoute implements Route {
 
   public getMethod(): HttpMethod {
     return this.method;
+  }
+  public getMiddlewares(): RequestHandler[] {
+    return this.middlewares;
   }
 }

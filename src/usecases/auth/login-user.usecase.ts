@@ -32,6 +32,8 @@ export class LoginUserUsecase implements Usecase<
   public async execute(input: LoginUserInputDTO): Promise<LoginUserOutputDTO> {
     const user = await this.userGateway.findByEmail(input.email);
 
+    if (!user) throw new Error("User not found");
+
     const ok = await this.passwordHash.compare(input.password, user.password);
 
     if (!ok) throw new Error("Invalid credentials");

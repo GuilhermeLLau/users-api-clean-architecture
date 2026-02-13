@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, RequestHandler, Response } from "express";
 import { CreateUserUsecase } from "../../../../../usecases/user/create-user.usecase";
 import { HttpMethod, Route } from "../routes";
 import { CreateUserInputDTO } from "../../../../../usecases/user/create-user.usecase";
@@ -11,14 +11,23 @@ export class CreateUserRoute implements Route {
     private readonly path: string,
     private readonly method: HttpMethod,
     private readonly createUserUsecase: CreateUserUsecase,
+    private readonly middlewares: RequestHandler[] = [],
   ) {}
 
-  public static create(createUserUsecase: CreateUserUsecase) {
-    return new CreateUserRoute("/users", HttpMethod.POST, createUserUsecase);
+  public static create(
+    createUserUsecase: CreateUserUsecase,
+    middlewares: RequestHandler[] = [],
+  ) {
+    return new CreateUserRoute(
+      "/users",
+      HttpMethod.POST,
+      createUserUsecase,
+      middlewares,
+    );
   }
 
   public getHandler() {
-    return async (request: Request, response: Response) => {
+    return async (request: Request, response: Response, next: NextFunction) => {
       const { name, email, password, role } = request.body;
 
       const input: CreateUserInputDTO = {
@@ -48,5 +57,9 @@ export class CreateUserRoute implements Route {
 
   public getMethod(): HttpMethod {
     return this.method;
+  }
+
+  public getMiddlewares(): RequestHandler[] {
+    return this.middlewares;
   }
 }

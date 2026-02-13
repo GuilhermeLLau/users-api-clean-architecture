@@ -10,7 +10,6 @@ export function makeAuthRoutes(deps: { prisma: any }): Route[] {
 
   const jwtSecret = process.env.JWT_TOKEN_SECRET;
   if (!jwtSecret) throw new Error("JWT_TOKEN_SECRET not defined");
-  console.log(jwtSecret);
   const tokenService = new JwtTokenService(jwtSecret);
   const passwordHasher = new BcryptPasswordHasher();
 

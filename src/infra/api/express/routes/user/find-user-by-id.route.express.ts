@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, RequestHandler, Response } from "express";
 import { HttpMethod, Route } from "../routes";
 import {
   FindUserByIdOutputDTO,
@@ -12,21 +12,26 @@ export class FindUserByIdRoute implements Route {
     private readonly path: string,
     private readonly method: HttpMethod,
     private findUserByIdUsecase: FindUserByIdUsecase,
+    private readonly middlewares: RequestHandler[] = [],
   ) {}
 
-  public static create(findUserByIdUsecase: FindUserByIdUsecase) {
+  public static create(
+    findUserByIdUsecase: FindUserByIdUsecase,
+    middlewares: RequestHandler[],
+  ) {
     return new FindUserByIdRoute(
       "/users/:id",
       HttpMethod.GET,
       findUserByIdUsecase,
+      middlewares,
     );
   }
 
   public getHandler() {
-    return async (request: Request, response: Response) => {
+    return async (request: Request, response: Response, next: NextFunction) => {
       const { id } = request.params;
 
-      if (!id) throw Error("Erro");
+      if (!id) throw new Error("Invalid id");
 
       const input: FindUserByIdInputDTO = {
         id: id.toString(),
@@ -47,5 +52,9 @@ export class FindUserByIdRoute implements Route {
   }
   public getMethod(): HttpMethod {
     return this.method;
+  }
+
+  public getMiddlewares(): RequestHandler[] {
+    return this.middlewares;
   }
 }

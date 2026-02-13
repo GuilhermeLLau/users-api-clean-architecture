@@ -74,7 +74,7 @@ export class UserRepositoryPrisma implements UserGateway {
 
   public async findById(id: string): Promise<User> {
     const user = await this.prisma.user.findUnique({ where: { id } });
-    if (!user) throw new Error("Usuário não encontrado");
+    if (!user) throw new Error("Invalid id");
 
     const output = User.with({
       id,
@@ -90,7 +90,7 @@ export class UserRepositoryPrisma implements UserGateway {
   }
   public async findByEmail(email: string): Promise<User> {
     const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user) throw new Error("Usuário não encontrado");
+    if (!user) throw new Error("Invalid email");
 
     const output = User.with({
       id: user.id,

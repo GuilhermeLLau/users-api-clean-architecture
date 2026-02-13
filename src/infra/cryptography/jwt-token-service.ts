@@ -13,7 +13,7 @@ export class JwtTokenService implements TokenService {
   public async sign(payload: TokenPayload): Promise<string> {
     return await jwt.sign(
       { id: payload.sub, role: payload.role },
-      "senhaSecreta",
+      this.secret,
       {
         expiresIn: "1m",
       },
