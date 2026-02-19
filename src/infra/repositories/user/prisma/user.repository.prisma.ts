@@ -15,7 +15,7 @@ export class UserRepositoryPrisma implements UserGateway {
       id: user.id,
       name: user.name,
       email: user.email,
-      password: user.password,
+      passwordHash: user.passwordHash,
       role: user.role,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
@@ -31,7 +31,7 @@ export class UserRepositoryPrisma implements UserGateway {
         id: u.id,
         name: u.name,
         email: u.email,
-        password: u.password,
+        passwordHash: u.passwordHash,
         role: u.role,
         createdAt: u.createdAt,
         updatedAt: u.updatedAt,
@@ -59,7 +59,7 @@ export class UserRepositoryPrisma implements UserGateway {
       id: updated.id,
       name: updated.name,
       email: updated.email,
-      password: updated.password,
+      passwordHash: updated.passwordHash,
       role: updated.role,
       createdAt: updated.createdAt,
       updatedAt: updated.updatedAt,
@@ -69,7 +69,7 @@ export class UserRepositoryPrisma implements UserGateway {
   }
 
   public async delete(id: string): Promise<void> {
-    const deletedUser = await this.prisma.user.delete({ where: { id } });
+    await this.prisma.user.delete({ where: { id } });
   }
 
   public async findById(id: string): Promise<User> {
@@ -80,7 +80,7 @@ export class UserRepositoryPrisma implements UserGateway {
       id,
       name: user.name,
       email: user.email,
-      password: user.password,
+      passwordHash: user.passwordHash,
       role: user.role,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
@@ -96,7 +96,7 @@ export class UserRepositoryPrisma implements UserGateway {
       id: user.id,
       name: user.name,
       email,
-      password: user.password,
+      passwordHash: user.passwordHash,
       role: user.role,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,

@@ -9,7 +9,7 @@ export type ListUserOutputDTO = {
     id: string;
     name: string;
     email: string;
-    password: string;
+    passwordHash: string;
     role: UserRole;
     createdAt: Date;
     updatedAt: Date;
@@ -41,7 +41,7 @@ export class ListUserUseCase implements Usecase<
           id: u.id,
           name: u.name,
           email: u.email,
-          password: u.password,
+          passwordHash: u.passwordHash,
           role: u.role,
           createdAt: u.createdAt,
           updatedAt: u.updatedAt,

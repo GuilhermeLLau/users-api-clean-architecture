@@ -11,7 +11,7 @@ export type ListUserResponseDTO = {
     id: string;
     name: string;
     email: string;
-    password: string;
+    passwordHash: string;
     role: UserRole;
     createdAt: Date;
     updatedAt: Date;
@@ -52,7 +52,7 @@ export class ListUserRoute implements Route {
         id: user.id,
         name: user.name,
         email: user.email,
-        password: user.password,
+        passwordHash: user.passwordHash,
         role: user.role,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,

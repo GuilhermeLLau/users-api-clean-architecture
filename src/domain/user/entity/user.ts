@@ -9,7 +9,7 @@ export type UserProps = {
   id: string;
   name: string;
   email: string;
-  password: string;
+  passwordHash: string;
   role: UserRole;
   createdAt: Date;
   updatedAt: Date;
@@ -21,7 +21,7 @@ export class User {
   public static build(
     name: string,
     email: string,
-    password: string,
+    passwordHash: string,
     role: UserRole,
   ) {
     const now = new Date();
@@ -29,7 +29,7 @@ export class User {
       id: crypto.randomUUID().toString(),
       name,
       email,
-      password,
+      passwordHash,
       role,
       createdAt: now,
       updatedAt: now,
@@ -64,8 +64,8 @@ export class User {
     return this.props.updatedAt;
   }
 
-  public get password() {
-    return this.props.password;
+  public get passwordHash() {
+    return this.props.passwordHash;
   }
 
   public isAdmin(): boolean {
@@ -76,8 +76,8 @@ export class User {
     this.props.name = name;
   }
 
-  public changePassword(password: string) {
-    this.props.password = password;
+  public changePasswordHash(passwordHash: string) {
+    this.props.passwordHash = passwordHash;
   }
 
   public changeRole(role: UserRole) {

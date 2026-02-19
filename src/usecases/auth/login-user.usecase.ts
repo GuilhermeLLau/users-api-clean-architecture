@@ -1,5 +1,8 @@
 import { UserGateway } from "../../domain/user/gateway/user.gateway";
+import { CreateRefreshTokenUsecase } from "../refreshToken/create-refresh-token.usecase";
 import { PasswordHasher } from "../security/password-hasher";
+import { RefreshTokenGenerator } from "../security/refresh-token-generator";
+import { TokenHasher } from "../security/token-hasher";
 import { TokenService } from "../security/token-service";
 import { Usecase } from "../usecase";
 
@@ -9,6 +12,7 @@ export type LoginUserInputDTO = {
 };
 export type LoginUserOutputDTO = {
   token: string;
+  refreshToken: string;
 };
 
 export class LoginUserUsecase implements Usecase<
@@ -19,14 +23,27 @@ export class LoginUserUsecase implements Usecase<
     private readonly userGateway: UserGateway,
     private readonly tokenService: TokenService,
     private readonly passwordHash: PasswordHasher,
+    private readonly createRefreshTokenUsecase: CreateRefreshTokenUsecase,
+    private readonly tokenHasher: TokenHasher,
+    private readonly refreshTokenGenerator: RefreshTokenGenerator,
   ) {}
 
   public static build(
     userGateway: UserGateway,
     tokenService: TokenService,
     passwordHash: PasswordHasher,
+    createRefreshTokenUsecase: CreateRefreshTokenUsecase,
+    tokenHasher: TokenHasher,
+    refreshTokenGenerator: RefreshTokenGenerator,
   ) {
-    return new LoginUserUsecase(userGateway, tokenService, passwordHash);
+    return new LoginUserUsecase(
+      userGateway,
+      tokenService,
+      passwordHash,
+      createRefreshTokenUsecase,
+      tokenHasher,
+      refreshTokenGenerator,
+    );
   }
 
   public async execute(input: LoginUserInputDTO): Promise<LoginUserOutputDTO> {
@@ -34,15 +51,28 @@ export class LoginUserUsecase implements Usecase<
 
     if (!user) throw new Error("User not found");
 
-    const ok = await this.passwordHash.compare(input.password, user.password);
+    const ok = await this.passwordHash.compare(
+      input.password,
+      user.passwordHash,
+    );
 
     if (!ok) throw new Error("Invalid credentials");
 
-    const token = await this.tokenService.sign({
+    const refreshRaw = await this.refreshTokenGenerator.generate();
+    const tokenHash = await this.tokenHasher.hash(refreshRaw);
+
+    const accessToken = await this.tokenService.generateAccessToken({
       sub: user.id,
       role: user.role,
     });
 
-    return { token };
+    const refreshTokenData = {
+      token: tokenHash,
+      userId: user.id,
+    };
+
+    await this.createRefreshTokenUsecase.execute(refreshTokenData);
+
+    return { token: accessToken, refreshToken: refreshRaw };
   }
 }

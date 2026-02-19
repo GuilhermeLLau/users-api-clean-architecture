@@ -9,6 +9,7 @@ export type LoginUserInputDTO = {
 
 export type LoginUserResponseDTO = {
   token: string;
+  refreshToken: string;
 };
 
 export class LoginUserRoute implements Route {
@@ -39,7 +40,7 @@ export class LoginUserRoute implements Route {
   }
 
   private present(input: LoginUserResponseDTO): LoginUserResponseDTO {
-    const response = { token: input.token };
+    const response = { token: input.token, refreshToken: input.refreshToken };
     return response;
   }
 
