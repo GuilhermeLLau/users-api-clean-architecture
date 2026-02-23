@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, RequestHandler, Response } from "express";
 import { LoginUserUsecase } from "../../../../usecases/auth/login-user.usecase";
 import { HttpMethod, Route } from "../routes/routes";
 
@@ -17,10 +17,19 @@ export class LoginUserRoute implements Route {
     private readonly path: string,
     private readonly method: HttpMethod,
     private readonly loginUserUsecase: LoginUserUsecase,
+    private readonly middlewares: RequestHandler[] = [],
   ) {}
 
-  public static create(loginUserUsecase: LoginUserUsecase) {
-    return new LoginUserRoute("/login", HttpMethod.POST, loginUserUsecase);
+  public static create(
+    loginUserUsecase: LoginUserUsecase,
+    middlewares: RequestHandler[] = [],
+  ) {
+    return new LoginUserRoute(
+      "/login",
+      HttpMethod.POST,
+      loginUserUsecase,
+      middlewares,
+    );
   }
 
   public getHandler() {
@@ -50,5 +59,8 @@ export class LoginUserRoute implements Route {
 
   public getMethod(): HttpMethod {
     return this.method;
+  }
+  public getMiddlewares(): RequestHandler[] {
+    return this.middlewares;
   }
 }

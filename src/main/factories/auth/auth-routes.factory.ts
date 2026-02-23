@@ -1,4 +1,7 @@
 import { LoginUserRoute } from "../../../infra/api/express/auth/login-user.route.express";
+import { DeleteRefreshTokenRoute } from "../../../infra/api/express/routes/refreshToken/delete-refresh-token.route.express";
+import { RefreshSessionTokenRoute } from "../../../infra/api/express/routes/refreshToken/refresh-session-token.route.express";
+import { RevokeRefreshTokenRoute } from "../../../infra/api/express/routes/refreshToken/revoke-refresh-token.route.express";
 import { Route } from "../../../infra/api/express/routes/routes";
 import { BcryptPasswordHasher } from "../../../infra/cryptography/bcrypt-password-hasher";
 import { CryptoRefreshTokenGenerator } from "../../../infra/cryptography/crypto-refresh-token-generator";
@@ -8,41 +11,26 @@ import { RefreshTokenRepositoryPrisma } from "../../../infra/repositories/refres
 import { UserRepositoryPrisma } from "../../../infra/repositories/user/prisma/user.repository.prisma";
 import { LoginUserUsecase } from "../../../usecases/auth/login-user.usecase";
 import { CreateRefreshTokenUsecase } from "../../../usecases/refreshToken/create-refresh-token.usecase";
+import { makeAuthContainer } from "../../container/auth.container";
+import { makeHttpContainer } from "../../container/http.container";
+import { makeSharedContainer } from "../../container/shared.container";
 
 export function makeAuthRoutes(deps: { prisma: any }): Route[] {
-  const userRepository = UserRepositoryPrisma.build(deps.prisma);
-  const refreshTokenRepository = RefreshTokenRepositoryPrisma.build(
-    deps.prisma,
-  );
+  const shared = makeSharedContainer(deps);
+  const http = makeHttpContainer({ tokenService: shared.tokenService });
+  const auth = makeAuthContainer({
+    prisma: shared.prisma,
+    tokenService: shared.tokenService,
+  });
 
-  const jwtSecret = process.env.JWT_TOKEN_SECRET;
-  if (!jwtSecret) throw new Error("JWT_TOKEN_SECRET not defined");
-
-  const jwtRefreshSecret = process.env.JWT_REFRESH_TOKEN_SECRET;
-  if (!jwtRefreshSecret)
-    throw new Error("JWT_REFRESH_TOKEN_SECRET not defined");
-
-  const pepper = process.env.REFRESH_TOKEN_PEPPER || "123";
-
-  const tokenService = new JwtTokenService(jwtSecret, jwtRefreshSecret);
-  const createRefreshTokenUsecase = CreateRefreshTokenUsecase.build(
-    refreshTokenRepository,
-  );
-  const passwordHasher = new BcryptPasswordHasher();
-
-  const tokenHasher = Sha256TokenHasher.build(pepper);
-  const refreshTokenGenerator = CryptoRefreshTokenGenerator.build();
-
-  const loginUserUsecase = LoginUserUsecase.build(
-    userRepository,
-    tokenService,
-    passwordHasher,
-    createRefreshTokenUsecase,
-    tokenHasher,
-    refreshTokenGenerator,
-  );
-
-  const loginUserRoute = LoginUserRoute.create(loginUserUsecase);
-
-  return [loginUserRoute];
+  return [
+    LoginUserRoute.create(auth.useCases.login, [http.validate.loginUserBody]),
+    RefreshSessionTokenRoute.create(auth.useCases.refreshSession),
+    DeleteRefreshTokenRoute.create(auth.useCases.deleteRefreshToken, [
+      http.validate.paramsId,
+    ]),
+    RevokeRefreshTokenRoute.create(auth.useCases.revokeRefreshSession, [
+      http.validate.paramsId,
+    ]),
+  ];
 }
