@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, RequestHandler, Response } from "express";
 import {
   ListUserOutputDTO,
   ListUserUseCase,
@@ -23,10 +23,19 @@ export class ListUserRoute implements Route {
     private readonly path: string,
     private readonly method: HttpMethod,
     private readonly listUserUsecase: ListUserUseCase,
+    private readonly middlewares: RequestHandler[] = [],
   ) {}
 
-  public static create(listUserUsecase: ListUserUseCase) {
-    return new ListUserRoute("/users", HttpMethod.GET, listUserUsecase);
+  public static create(
+    listUserUsecase: ListUserUseCase,
+    middlewares: RequestHandler[],
+  ) {
+    return new ListUserRoute(
+      "/users",
+      HttpMethod.GET,
+      listUserUsecase,
+      middlewares,
+    );
   }
 
   public getHandler() {
@@ -59,5 +68,9 @@ export class ListUserRoute implements Route {
       })),
     };
     return response;
+  }
+
+  public getMiddlewares(): RequestHandler[] {
+    return this.middlewares;
   }
 }

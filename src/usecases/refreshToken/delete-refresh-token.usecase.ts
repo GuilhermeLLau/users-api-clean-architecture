@@ -1,8 +1,9 @@
 import { RefreshTokenGateway } from "../../domain/user/gateway/refreshToken.gateway";
+import { TokenHasher } from "../security/token-hasher";
 import { Usecase } from "../usecase";
 
 type DeleteRefreshTokenInputDTO = {
-  id: string;
+  refreshToken: string;
 };
 
 type DeleteRefreshTokenOutputDTO = void;
@@ -13,17 +14,22 @@ export class DeleteRefreshTokenUsecase implements Usecase<
 > {
   private constructor(
     private readonly refreshTokenGateway: RefreshTokenGateway,
+    private readonly tokenHasher: TokenHasher,
   ) {}
 
-  public static build(refreshTokenGateway: RefreshTokenGateway) {
-    return new DeleteRefreshTokenUsecase(refreshTokenGateway);
+  public static build(
+    refreshTokenGateway: RefreshTokenGateway,
+    tokenHasher: TokenHasher,
+  ) {
+    return new DeleteRefreshTokenUsecase(refreshTokenGateway, tokenHasher);
   }
 
   public async execute(input: DeleteRefreshTokenInputDTO): Promise<void> {
     try {
-      await this.refreshTokenGateway.deleteToken(input.id);
+      const tokenHashed = await this.tokenHasher.hash(input.refreshToken);
+      await this.refreshTokenGateway.deleteToken(tokenHashed);
     } catch (err) {
-      throw new Error("Invalid Id");
+      throw new Error("Invalid Token");
     }
   }
 }

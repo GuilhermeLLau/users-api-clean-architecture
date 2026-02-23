@@ -2,7 +2,7 @@ import { NextFunction, Request, RequestHandler, Response } from "express";
 import { HttpMethod, Route } from "../routes";
 import { RevokeRefreshTokenUsecase } from "../../../../../usecases/refreshToken/revoke-refresh-token.usecase";
 export type RevokeRefreshTokenInputDTO = {
-  id: string;
+  refreshToken: string;
 };
 
 export class RevokeRefreshTokenRoute implements Route {
@@ -18,7 +18,7 @@ export class RevokeRefreshTokenRoute implements Route {
     middlewares: RequestHandler[],
   ) {
     return new RevokeRefreshTokenRoute(
-      "/refresh/:id",
+      "/refresh",
       HttpMethod.PUT,
       revokeRefreshTokenUsecase,
       middlewares,
@@ -27,12 +27,12 @@ export class RevokeRefreshTokenRoute implements Route {
 
   public getHandler() {
     return async (request: Request, response: Response, next: NextFunction) => {
-      const { id } = request.params;
+      const { refreshToken } = request.body;
 
-      if (!id) throw new Error("Invalid id");
+      if (!refreshToken) throw new Error("Invalid Refresh Token");
 
       const input: RevokeRefreshTokenInputDTO = {
-        id: id.toString(),
+        refreshToken,
       };
 
       await this.revokeRefreshTokenUsecase.execute(input);

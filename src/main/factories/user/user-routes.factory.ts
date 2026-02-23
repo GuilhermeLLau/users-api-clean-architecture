@@ -18,16 +18,20 @@ export function makeUserRoutes(deps: { prisma: any }): Route[] {
     CreateUserRoute.create(user.usecases.create, [
       http.validate.createUserBody,
     ]),
-    ListUserRoute.create(user.usecases.list),
+    ListUserRoute.create(user.usecases.list, [http.auth.isAdmin]),
     FindUserByIdRoute.create(user.usecases.findById, [
-      http.auth.required,
+      http.auth.isAdmin,
       http.validate.paramsId,
     ]),
     FindUserByEmailRoute.create(user.usecases.findByEmail, [
       http.validate.paramsEmail,
     ]),
-    DeleteUserRoute.create(user.usecases.delete, [http.validate.paramsId]),
+    DeleteUserRoute.create(user.usecases.delete, [
+      http.auth.isAdmin,
+      http.validate.paramsId,
+    ]),
     UpdateUserRoute.create(user.usecases.update, [
+      http.auth.isAdmin,
       http.validate.updateUserBody,
     ]),
   ];

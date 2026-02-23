@@ -1,11 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { TokenService } from "../../../../usecases/security/token-service";
 
-export const authMiddleware = (tokenService: TokenService) => {
+export const isAdminMiddleware = (tokenService: TokenService) => {
   return async (request: Request, response: Response, next: NextFunction) => {
     try {
       const authHeader = request.headers.authorization;
-
       if (!authHeader || !authHeader.startsWith("Bearer ")) {
         return response.status(401).json({ message: "Unauthorized" });
       }
@@ -17,6 +16,7 @@ export const authMiddleware = (tokenService: TokenService) => {
 
       const payload = await tokenService.verifyAccessToken(token);
 
+      if (payload.role !== "admin") throw new Error("Forbbiden");
       request.auth = payload;
 
       return next();

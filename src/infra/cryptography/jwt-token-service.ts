@@ -15,7 +15,7 @@ export class JwtTokenService implements TokenService {
   }
   public async generateAccessToken(payload: TokenPayload): Promise<string> {
     return jwt.sign({ sub: payload.sub, role: payload.role }, this.secret, {
-      expiresIn: "1m",
+      expiresIn: "5m",
     });
   }
   public async verifyAccessToken(token: string): Promise<TokenPayload> {

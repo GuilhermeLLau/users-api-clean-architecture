@@ -1,6 +1,5 @@
 import { BcryptPasswordHasher } from "../../infra/cryptography/bcrypt-password-hasher";
 import { CryptoRefreshTokenGenerator } from "../../infra/cryptography/crypto-refresh-token-generator";
-import { JwtTokenService } from "../../infra/cryptography/jwt-token-service";
 import { Sha256TokenHasher } from "../../infra/cryptography/sha256-token-hasher";
 import { RefreshTokenRepositoryPrisma } from "../../infra/repositories/refreshToken/prisma/refresh-token.prisma";
 import { UserRepositoryPrisma } from "../../infra/repositories/user/prisma/user.repository.prisma";
@@ -9,12 +8,16 @@ import { CreateRefreshTokenUsecase } from "../../usecases/refreshToken/create-re
 import { DeleteRefreshTokenUsecase } from "../../usecases/refreshToken/delete-refresh-token.usecase";
 import { RefreshSessionUsecase } from "../../usecases/refreshToken/refresh-session.usecase";
 import { RevokeRefreshTokenUsecase } from "../../usecases/refreshToken/revoke-refresh-token.usecase";
+import { PasswordHasher } from "../../usecases/security/password-hasher";
+import { RefreshTokenGenerator } from "../../usecases/security/refresh-token-generator";
+import { TokenHasher } from "../../usecases/security/token-hasher";
+import { TokenService } from "../../usecases/security/token-service";
 
 type AuthContainer = {
   services: {
-    passwordHasher: BcryptPasswordHasher;
-    tokenHasher: Sha256TokenHasher;
-    refreshTokenGenerator: CryptoRefreshTokenGenerator;
+    passwordHasher: PasswordHasher;
+    tokenHasher: TokenHasher;
+    refreshTokenGenerator: RefreshTokenGenerator;
   };
   useCases: {
     login: LoginUserUsecase;
@@ -27,7 +30,7 @@ type AuthContainer = {
 
 export function makeAuthContainer(deps: {
   prisma: any;
-  tokenService: JwtTokenService;
+  tokenService: TokenService;
 }): AuthContainer {
   const userRepository = UserRepositoryPrisma.build(deps.prisma);
   const refreshTokenRepository = RefreshTokenRepositoryPrisma.build(
@@ -46,10 +49,12 @@ export function makeAuthContainer(deps: {
 
   const revokeRefreshSessionUsecase = RevokeRefreshTokenUsecase.build(
     refreshTokenRepository,
+    tokenHasher,
   );
 
   const deleteRefreshTokenUsecase = DeleteRefreshTokenUsecase.build(
     refreshTokenRepository,
+    tokenHasher,
   );
 
   const loginUsecase = LoginUserUsecase.build(

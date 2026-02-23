@@ -22,18 +22,18 @@ export class RefreshTokenRepositoryPrisma implements RefreshTokenGateway {
 
     await this.prisma.refreshToken.create({ data });
   }
-  public async revokeToken(id: string): Promise<void> {
+  public async revokeToken(refreshToken: string): Promise<void> {
     await this.prisma.refreshToken.update({
-      where: { id },
+      where: { tokenHash: refreshToken },
       data: {
         revoked: true,
         revokedAt: new Date(),
       },
     });
   }
-  public async deleteToken(id: string): Promise<void> {
+  public async deleteToken(refreshToken: string): Promise<void> {
     await this.prisma.refreshToken.delete({
-      where: { id },
+      where: { tokenHash: refreshToken },
     });
   }
 

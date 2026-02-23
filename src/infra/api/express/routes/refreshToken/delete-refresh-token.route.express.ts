@@ -2,7 +2,7 @@ import { NextFunction, Request, RequestHandler, Response } from "express";
 import { HttpMethod, Route } from "../routes";
 import { DeleteRefreshTokenUsecase } from "../../../../../usecases/refreshToken/delete-refresh-token.usecase";
 export type DeleteRefreshTokenInputDTO = {
-  id: string;
+  refreshToken: string;
 };
 
 export class DeleteRefreshTokenRoute implements Route {
@@ -18,7 +18,7 @@ export class DeleteRefreshTokenRoute implements Route {
     middlewares: RequestHandler[],
   ) {
     return new DeleteRefreshTokenRoute(
-      "/refresh/:id",
+      "/refresh",
       HttpMethod.DELETE,
       deleteRefreshTokenUsecase,
       middlewares,
@@ -27,17 +27,17 @@ export class DeleteRefreshTokenRoute implements Route {
 
   public getHandler() {
     return async (request: Request, response: Response, next: NextFunction) => {
-      const { id } = request.params;
+      const { refreshToken } = request.body;
 
-      if (!id) throw new Error("Invalid id");
+      if (!refreshToken) throw new Error("Invalid Refresh Token");
 
       const input: DeleteRefreshTokenInputDTO = {
-        id: id.toString(),
+        refreshToken,
       };
 
       await this.deleteRefreshTokenUsecase.execute(input);
 
-      response.status(201).json({ message: "Token deleted" });
+      response.status(201).json({ message: "Refresh Token Deleted" });
     };
   }
 

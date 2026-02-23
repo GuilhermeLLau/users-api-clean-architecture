@@ -1,10 +1,11 @@
 import { JwtTokenService } from "../../infra/cryptography/jwt-token-service";
+import { TokenService } from "../../usecases/security/token-service";
 
 type SharedDeps = { prisma: any };
 
 export type SharedContainer = {
   prisma: any;
-  tokenService: JwtTokenService;
+  tokenService: TokenService;
 };
 
 export function makeSharedContainer(deps: SharedDeps): SharedContainer {
