@@ -1,14 +1,27 @@
 import crypto from "crypto";
-import { RefreshTokenGenerator } from "../../usecases/security/refresh-token-generator";
+import { TokenGenerator } from "../../usecases/security/token-generator";
 
-export class CryptoRefreshTokenGenerator implements RefreshTokenGenerator {
+export class CryptoTokenGenerator implements TokenGenerator {
   private constructor() {}
 
   public static build() {
-    return new CryptoRefreshTokenGenerator();
+    return new CryptoTokenGenerator();
   }
 
-  public async generate(): Promise<string> {
+  public async generateRandomToken(): Promise<string> {
     return crypto.randomBytes(48).toString("base64url");
+  }
+
+  public async generateResetPasswordToken(): Promise<string> {
+    const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const bytes = crypto.randomBytes(6);
+
+    let code = "";
+
+    for (let i = 0; i < 6; i++) {
+      code += chars[bytes[i] % chars.length];
+    }
+
+    return code;
   }
 }

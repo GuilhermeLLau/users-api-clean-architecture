@@ -1,5 +1,5 @@
-import { RefreshToken } from "../../../../domain/user/entity/refreshToken";
-import { RefreshTokenGateway } from "../../../../domain/user/gateway/refreshToken.gateway";
+import { RefreshToken } from "../../../../domain/refreshToken/enitty/refreshToken";
+import { RefreshTokenGateway } from "../../../../domain/refreshToken/gateway/refreshToken.gateway";
 import { PrismaClient } from "../../../../generated/prisma/client";
 
 export class RefreshTokenRepositoryPrisma implements RefreshTokenGateway {

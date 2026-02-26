@@ -1,47 +1,37 @@
-import { BcryptPasswordHasher } from "../../infra/cryptography/bcrypt-password-hasher";
-import { CryptoRefreshTokenGenerator } from "../../infra/cryptography/crypto-refresh-token-generator";
-import { Sha256TokenHasher } from "../../infra/cryptography/sha256-token-hasher";
+import { PasswordResetTokenRepositoryPrisma } from "../../infra/repositories/passwordResetToken/prisma/password-reset-token.prisma";
 import { RefreshTokenRepositoryPrisma } from "../../infra/repositories/refreshToken/prisma/refresh-token.prisma";
 import { UserRepositoryPrisma } from "../../infra/repositories/user/prisma/user.repository.prisma";
 import { LoginUserUsecase } from "../../usecases/auth/login-user.usecase";
+import { RequestPasswordResetUsecase } from "../../usecases/auth/request-password-reset.uscase";
+import { ResetPasswordUsecase } from "../../usecases/auth/reset-password-usecase";
 import { CreateRefreshTokenUsecase } from "../../usecases/refreshToken/create-refresh-token.usecase";
 import { DeleteRefreshTokenUsecase } from "../../usecases/refreshToken/delete-refresh-token.usecase";
 import { RefreshSessionUsecase } from "../../usecases/refreshToken/refresh-session.usecase";
 import { RevokeRefreshTokenUsecase } from "../../usecases/refreshToken/revoke-refresh-token.usecase";
-import { PasswordHasher } from "../../usecases/security/password-hasher";
-import { RefreshTokenGenerator } from "../../usecases/security/refresh-token-generator";
-import { TokenHasher } from "../../usecases/security/token-hasher";
-import { TokenService } from "../../usecases/security/token-service";
+import { SharedContainer } from "./shared.container";
+
+type AuthDeps = { shared: SharedContainer };
 
 type AuthContainer = {
-  services: {
-    passwordHasher: PasswordHasher;
-    tokenHasher: TokenHasher;
-    refreshTokenGenerator: RefreshTokenGenerator;
-  };
   useCases: {
-    login: LoginUserUsecase;
-    refreshSession: RefreshSessionUsecase;
-    revokeRefreshSession: RevokeRefreshTokenUsecase;
-    createRefreshToken: CreateRefreshTokenUsecase;
-    deleteRefreshToken: DeleteRefreshTokenUsecase;
+    loginUsecase: LoginUserUsecase;
+    refreshSessionUsecase: RefreshSessionUsecase;
+    revokeRefreshSessionUsecase: RevokeRefreshTokenUsecase;
+    createRefreshTokenUsecase: CreateRefreshTokenUsecase;
+    deleteRefreshTokenUsecase: DeleteRefreshTokenUsecase;
+    requestResetPasswordUsecase: RequestPasswordResetUsecase;
+    resetPasswordUsecase: ResetPasswordUsecase;
   };
 };
 
-export function makeAuthContainer(deps: {
-  prisma: any;
-  tokenService: TokenService;
-}): AuthContainer {
-  const userRepository = UserRepositoryPrisma.build(deps.prisma);
+export function makeAuthContainer(deps: AuthDeps): AuthContainer {
+  const userRepository = UserRepositoryPrisma.build(deps.shared.prisma);
   const refreshTokenRepository = RefreshTokenRepositoryPrisma.build(
-    deps.prisma,
+    deps.shared.prisma,
   );
-
-  const pepper = process.env.REFRESH_TOKEN_PEPPER || "123";
-
-  const passwordHasher = new BcryptPasswordHasher();
-  const tokenHasher = new Sha256TokenHasher(pepper);
-  const refreshTokenGenerator = CryptoRefreshTokenGenerator.build();
+  const passwordResetTokenRepository = PasswordResetTokenRepositoryPrisma.build(
+    deps.shared.prisma,
+  );
 
   const createRefreshTokenUsecase = CreateRefreshTokenUsecase.build(
     refreshTokenRepository,
@@ -49,43 +39,55 @@ export function makeAuthContainer(deps: {
 
   const revokeRefreshSessionUsecase = RevokeRefreshTokenUsecase.build(
     refreshTokenRepository,
-    tokenHasher,
+    deps.shared.tokenHasher,
   );
 
   const deleteRefreshTokenUsecase = DeleteRefreshTokenUsecase.build(
     refreshTokenRepository,
-    tokenHasher,
+    deps.shared.tokenHasher,
   );
 
   const loginUsecase = LoginUserUsecase.build(
     userRepository,
-    deps.tokenService,
-    passwordHasher,
+    deps.shared.tokenService,
+    deps.shared.passwordHasher,
     createRefreshTokenUsecase,
-    tokenHasher,
-    refreshTokenGenerator,
+    deps.shared.tokenHasher,
+    deps.shared.tokenGenerator,
   );
 
   const refreshSessionUsecase = RefreshSessionUsecase.build(
-    deps.tokenService,
+    deps.shared.tokenService,
     refreshTokenRepository,
     userRepository,
-    tokenHasher,
-    refreshTokenGenerator,
+    deps.shared.tokenHasher,
+    deps.shared.tokenGenerator,
+  );
+
+  const requestResetPasswordUsecase = RequestPasswordResetUsecase.build(
+    userRepository,
+    deps.shared.tokenGenerator,
+    deps.shared.tokenHasher,
+    passwordResetTokenRepository,
+    deps.shared.mailProvider,
+  );
+
+  const resetPasswordUsecase = ResetPasswordUsecase.build(
+    passwordResetTokenRepository,
+    deps.shared.tokenHasher,
+    userRepository,
+    deps.shared.passwordHasher,
   );
 
   return {
-    services: {
-      passwordHasher,
-      tokenHasher,
-      refreshTokenGenerator,
-    },
     useCases: {
-      login: loginUsecase,
-      refreshSession: refreshSessionUsecase,
-      revokeRefreshSession: revokeRefreshSessionUsecase,
-      createRefreshToken: createRefreshTokenUsecase,
-      deleteRefreshToken: deleteRefreshTokenUsecase,
+      loginUsecase,
+      refreshSessionUsecase,
+      revokeRefreshSessionUsecase,
+      createRefreshTokenUsecase,
+      deleteRefreshTokenUsecase,
+      requestResetPasswordUsecase,
+      resetPasswordUsecase,
     },
   };
 }

@@ -1,7 +1,7 @@
-import { RefreshToken } from "../../domain/user/entity/refreshToken";
-import { RefreshTokenGateway } from "../../domain/user/gateway/refreshToken.gateway";
+import { RefreshToken } from "../../domain/refreshToken/enitty/refreshToken";
+import { RefreshTokenGateway } from "../../domain/refreshToken/gateway/refreshToken.gateway";
 import { UserGateway } from "../../domain/user/gateway/user.gateway";
-import { RefreshTokenGenerator } from "../security/refresh-token-generator";
+import { TokenGenerator } from "../security/token-generator";
 import { TokenHasher } from "../security/token-hasher";
 import { TokenService } from "../security/token-service";
 import { Usecase } from "../usecase";
@@ -23,7 +23,7 @@ export class RefreshSessionUsecase implements Usecase<
     private readonly refreshTokenGateway: RefreshTokenGateway,
     private readonly userGateway: UserGateway,
     private readonly tokenHasher: TokenHasher,
-    private readonly refreshTokenGenerator: RefreshTokenGenerator,
+    private readonly tokenGenerator: TokenGenerator,
   ) {}
 
   public static build(
@@ -31,14 +31,14 @@ export class RefreshSessionUsecase implements Usecase<
     refreshTokenGateway: RefreshTokenGateway,
     userGateway: UserGateway,
     tokenHasher: TokenHasher,
-    refreshTokenGenerator: RefreshTokenGenerator,
+    tokenGenerator: TokenGenerator,
   ) {
     return new RefreshSessionUsecase(
       tokenService,
       refreshTokenGateway,
       userGateway,
       tokenHasher,
-      refreshTokenGenerator,
+      tokenGenerator,
     );
   }
 
@@ -69,7 +69,7 @@ export class RefreshSessionUsecase implements Usecase<
       role: user.role,
     });
 
-    const newRefreshRaw = await this.refreshTokenGenerator.generate();
+    const newRefreshRaw = await this.tokenGenerator.generateRandomToken();
     const newRefreshHash = await this.tokenHasher.hash(newRefreshRaw);
 
     const saveRefreshToken = RefreshToken.build(newRefreshHash, user.id);

@@ -1,5 +1,7 @@
+import { IMailProvider } from "../../domain/shared/mail/mail.gateway";
 import { User, UserRole } from "../../domain/user/entity/user";
 import { UserGateway } from "../../domain/user/gateway/user.gateway";
+import { welcomeUserEmailTemplate } from "../notifications/email/welcome-user.email.template";
 import { PasswordHasher } from "../security/password-hasher";
 import { Usecase } from "../usecase";
 
@@ -22,13 +24,15 @@ export class CreateUserUsecase implements Usecase<
   private constructor(
     private readonly userGateway: UserGateway,
     private readonly passwordHasher: PasswordHasher,
+    private readonly mailProvider: IMailProvider,
   ) {}
 
   public static build(
     userGateway: UserGateway,
     passwordHasher: PasswordHasher,
+    mailProvider: IMailProvider,
   ) {
-    return new CreateUserUsecase(userGateway, passwordHasher);
+    return new CreateUserUsecase(userGateway, passwordHasher, mailProvider);
   }
 
   public async execute(
@@ -38,6 +42,18 @@ export class CreateUserUsecase implements Usecase<
     const user = User.build(input.name, input.email, hashPassword, input.role);
 
     await this.userGateway.create(user);
+
+    try {
+      const mail = welcomeUserEmailTemplate({ name: user.name });
+      await this.mailProvider.sendMail({
+        to: user.email,
+        subject: mail.subject,
+        html: mail.html,
+        text: mail.text,
+      });
+    } catch (err) {
+      console.log(err);
+    }
 
     const output = this.presentOutput(user);
 

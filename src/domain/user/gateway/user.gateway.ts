@@ -8,4 +8,5 @@ export interface UserGateway {
   delete(id: string): Promise<void>;
   findById(id: string): Promise<User>;
   findByEmail(email: string): Promise<User>;
+  updatePassword(id: string, passwordHash: string): Promise<void>;
 }

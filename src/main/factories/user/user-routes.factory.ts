@@ -1,4 +1,7 @@
-import { makeSharedContainer } from "../../container/shared.container";
+import {
+  makeSharedContainer,
+  SharedContainer,
+} from "../../container/shared.container";
 import { makeUserContainer } from "../../container/user.container";
 import { makeHttpContainer } from "../../container/http.container";
 import { CreateUserRoute } from "../../../infra/api/express/routes/user/create-user.route.express";
@@ -9,10 +12,9 @@ import { UpdateUserRoute } from "../../../infra/api/express/routes/user/update-u
 import { DeleteUserRoute } from "../../../infra/api/express/routes/user/delete-user.route.express";
 import { Route } from "../../../infra/api/express/routes/routes";
 
-export function makeUserRoutes(deps: { prisma: any }): Route[] {
-  const shared = makeSharedContainer(deps);
-  const user = makeUserContainer({ prisma: shared.prisma });
-  const http = makeHttpContainer({ tokenService: shared.tokenService });
+export function makeUserRoutes(deps: { shared: SharedContainer }): Route[] {
+  const user = makeUserContainer({ shared: deps.shared });
+  const http = makeHttpContainer({ shared: deps.shared });
 
   return [
     CreateUserRoute.create(user.usecases.create, [

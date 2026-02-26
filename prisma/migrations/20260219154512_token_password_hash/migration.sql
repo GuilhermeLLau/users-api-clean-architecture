@@ -18,7 +18,7 @@ CREATE TABLE "new_RefreshToken" (
     "expiresAt" DATETIME NOT NULL,
     "revoked" BOOLEAN NOT NULL DEFAULT false,
     "revokedAt" DATETIME,
-    CONSTRAINT "RefreshToken_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT "RefreshToken_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 INSERT INTO "new_RefreshToken" ("createdAt", "expiresAt", "id", "revoked", "revokedAt", "userId") SELECT "createdAt", "expiresAt", "id", "revoked", "revokedAt", "userId" FROM "RefreshToken";
 DROP TABLE "RefreshToken";

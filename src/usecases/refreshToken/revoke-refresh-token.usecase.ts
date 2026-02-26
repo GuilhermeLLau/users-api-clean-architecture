@@ -1,4 +1,4 @@
-import { RefreshTokenGateway } from "../../domain/user/gateway/refreshToken.gateway";
+import { RefreshTokenGateway } from "../../domain/refreshToken/gateway/refreshToken.gateway";
 import { TokenHasher } from "../security/token-hasher";
 import { Usecase } from "../usecase";
 

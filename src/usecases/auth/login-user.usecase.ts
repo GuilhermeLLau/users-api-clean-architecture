@@ -1,7 +1,7 @@
 import { UserGateway } from "../../domain/user/gateway/user.gateway";
 import { CreateRefreshTokenUsecase } from "../refreshToken/create-refresh-token.usecase";
 import { PasswordHasher } from "../security/password-hasher";
-import { RefreshTokenGenerator } from "../security/refresh-token-generator";
+import { TokenGenerator } from "../security/token-generator";
 import { TokenHasher } from "../security/token-hasher";
 import { TokenService } from "../security/token-service";
 import { Usecase } from "../usecase";
@@ -25,7 +25,7 @@ export class LoginUserUsecase implements Usecase<
     private readonly passwordHash: PasswordHasher,
     private readonly createRefreshTokenUsecase: CreateRefreshTokenUsecase,
     private readonly tokenHasher: TokenHasher,
-    private readonly refreshTokenGenerator: RefreshTokenGenerator,
+    private readonly tokenGenerator: TokenGenerator,
   ) {}
 
   public static build(
@@ -34,7 +34,7 @@ export class LoginUserUsecase implements Usecase<
     passwordHash: PasswordHasher,
     createRefreshTokenUsecase: CreateRefreshTokenUsecase,
     tokenHasher: TokenHasher,
-    refreshTokenGenerator: RefreshTokenGenerator,
+    tokenGenerator: TokenGenerator,
   ) {
     return new LoginUserUsecase(
       userGateway,
@@ -42,7 +42,7 @@ export class LoginUserUsecase implements Usecase<
       passwordHash,
       createRefreshTokenUsecase,
       tokenHasher,
-      refreshTokenGenerator,
+      tokenGenerator,
     );
   }
 
@@ -58,7 +58,7 @@ export class LoginUserUsecase implements Usecase<
 
     if (!ok) throw new Error("Invalid credentials");
 
-    const refreshRaw = await this.refreshTokenGenerator.generate();
+    const refreshRaw = await this.tokenGenerator.generateRandomToken();
     const tokenHash = await this.tokenHasher.hash(refreshRaw);
 
     const accessToken = await this.tokenService.generateAccessToken({
