@@ -2,6 +2,8 @@ import { Api } from "./api";
 import express, { Express } from "express";
 import { Route } from "./express/routes/routes";
 import { errorMiddleware } from "./express/middlewares/error.middleware";
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./express/swagger/swagger.config";
 
 export class ApiExpress implements Api {
   private app: Express;
@@ -9,6 +11,7 @@ export class ApiExpress implements Api {
   private constructor(routes: Route[]) {
     this.app = express();
     this.app.use(express.json());
+    this.app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
     this.addRoutes(routes);
     this.app.use(errorMiddleware);
   }

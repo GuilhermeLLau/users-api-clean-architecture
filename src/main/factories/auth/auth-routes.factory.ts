@@ -1,6 +1,6 @@
-import { LoginUserRoute } from "../../../infra/api/express/auth/login-user.route.express";
-import { RequestPasswordResetRoute } from "../../../infra/api/express/auth/reset-password-request.route.express";
-import { ResetPasswordRoute } from "../../../infra/api/express/auth/reset-password.route.express";
+import { LoginUserRoute } from "../../../infra/api/express/routes/auth/login-user.route.express";
+import { RequestPasswordResetRoute } from "../../../infra/api/express/routes/auth/reset-password-request.route.express";
+import { ResetPasswordRoute } from "../../../infra/api/express/routes/auth/reset-password.route.express";
 import { resetPasswordRequestRateLimiter } from "../../../infra/api/express/ratelimiter/reset-password-reset.ratelimiter.express";
 import { DeleteRefreshTokenRoute } from "../../../infra/api/express/routes/refreshToken/delete-refresh-token.route.express";
 import { RefreshSessionTokenRoute } from "../../../infra/api/express/routes/refreshToken/refresh-session-token.route.express";

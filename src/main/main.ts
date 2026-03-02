@@ -4,6 +4,7 @@ import { prisma } from "../package/prisma/prisma";
 import { makeSharedContainer } from "./container/shared.container";
 import { makeAuthRoutes } from "./factories/auth/auth-routes.factory";
 import { makeUserRoutes } from "./factories/user/user-routes.factory";
+
 import "dotenv/config";
 
 async function main() {

@@ -1,6 +1,6 @@
 import { Request, RequestHandler, Response } from "express";
-import { LoginUserUsecase } from "../../../../usecases/auth/login-user.usecase";
-import { HttpMethod, Route } from "../routes/routes";
+import { LoginUserUsecase } from "../../../../../usecases/auth/login-user.usecase";
+import { HttpMethod, Route } from "../routes";
 
 export type LoginUserInputDTO = {
   email: string;

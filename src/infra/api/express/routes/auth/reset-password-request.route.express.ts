@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction, RequestHandler } from "express";
-import { HttpMethod, Route } from "../routes/routes";
-import { RequestPasswordResetUsecase } from "../../../../usecases/auth/request-password-reset.uscase";
+import { HttpMethod, Route } from "../routes";
+import { RequestPasswordResetUsecase } from "../../../../../usecases/auth/request-password-reset.uscase";
 
 export class RequestPasswordResetRoute implements Route {
   private constructor(

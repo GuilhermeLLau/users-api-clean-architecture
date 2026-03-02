@@ -38,7 +38,7 @@ export class DeleteUserRoute implements Route {
 
       await this.deleteUserUsecase.execute(input);
 
-      response.status(201).json({ message: "User deleted" });
+      response.status(200).json({ message: "User deleted" });
     };
   }
 

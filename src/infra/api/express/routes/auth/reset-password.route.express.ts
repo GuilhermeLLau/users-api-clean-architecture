@@ -1,6 +1,6 @@
 import { Request, RequestHandler, Response } from "express";
-import { HttpMethod, Route } from "../routes/routes";
-import { ResetPasswordUsecase } from "../../../../usecases/auth/reset-password-usecase";
+import { HttpMethod, Route } from "../routes";
+import { ResetPasswordUsecase } from "../../../../../usecases/auth/reset-password-usecase";
 
 export type ResetPasswordInputDTO = {
   token: string;
