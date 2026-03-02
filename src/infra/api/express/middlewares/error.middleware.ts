@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import { ZodError } from "zod";
 
 export function errorMiddleware(
   err: any,
